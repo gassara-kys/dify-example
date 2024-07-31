@@ -19,7 +19,7 @@ AWSではAmazon GuardDutyなどの既存のセキュリティサービスと Ama
 
 構築する仕組みは以下のような構成になります。
 
-![AWS Architecture](../image/aws-architechture.png)
+![AWS Architecture](../image/aws-architecture.png)
 
 - Difyサーバの構築
   - Difyを使ってセキュリティオペレーションのワークフロー定義を作成します
@@ -65,7 +65,6 @@ Docker version 25.0.3, build 4debf41
 Difyは `docker compose` を使ってコンテナを実行できます。
 最新のインストール方法は[公式ドキュメント](https://matsuand.github.io/docs.docker.jp.onthefly/compose/install/)を参照してください。
 
-
 ```bash
 $ DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
 $ mkdir -p $DOCKER_CONFIG/cli-plugins
@@ -78,7 +77,6 @@ Docker Compose version v2.29.1
 ### Difyサーバの立ち上げ
 DifyはOSSとして公開されていますので、GitHubから[ソースコード](https://github.com/langgenius/dify.git)をダウンロードし、サーバを立ち上げます。
 
-
 ```bash
 $ git clone https://github.com/langgenius/dify.git
 $ cd dify/docker
@@ -89,7 +87,7 @@ $ docker compose up -d
 Difyには複数のサービスが含まれていることがわかります。
 ```bash
 $ docker compose ps --services
-api       # バックエンドのAPI(Phython)
+api       # バックエンドのAPI(Python)
 db        # DB(PostgreSQL)
 nginx     # nginx(リバースプロキシ)
 redis     # Redis
@@ -113,7 +111,6 @@ worker     # ワーカー
 ![ALB](../image/aws-access-control.png)
 
 今回はALBを使う手順を記載します。ALB側でIPアドレス制限やOIDC認証（Cognitoなど）を挟むことができます。また、Difyサーバを直接インターネットフェーシングにせずに済むためサーバの脆弱性リスクを軽減できます。
-
 
 #### ALBの作成
 
@@ -202,7 +199,6 @@ Difyのコンソール画面にログインして右上のメニューから「�
 
 ここまででDifyからAmazon Bedrockを利用できるようになりました。
 
-
 ### ナレッジの登録
 
 Amazon GuardDutyのFindingをLLMで解説させるために、公式のドキュメントをナレッジとして登録します。
@@ -226,7 +222,6 @@ Difyのナレッジメニューで「知識を作成」を選択します
 ただ、ナレッジ作成においては適切なチャンキング処理（ドキュメントの分割）が非常に重要で、目的のデータをコンテキストに含めることができるかがポイントになります。（RAGと言われる手法）
 
 ここは多少お金と時間がかかってしまいますが、我慢して待ちます。
-
 
 ### ワークフローを作成
 
@@ -253,9 +248,7 @@ Difyのナレッジメニューで「知識を作成」を選択します
 - ナレッジを選択する
 - 通知先のSlack webhook URLを設定する
 
-
 ![ワークフロー](../image/dify-studio-workflow.png)
-
 
 #### ワークフローのテスト
 
@@ -302,7 +295,6 @@ curl -X POST "http://${HOST}/v1/workflows/run" \
 }'
 ```
 
-
 ## Amazon GuardDutyとDifyのワークフロー連携させる
 
 最後に、Amazon GuardDutyのイベントをDifyのワークフローに連携させます。
@@ -325,12 +317,12 @@ EventBridgeからイベントデータを受け取り、パースしてDifyのAP
   - 関数名は「AnalyzeGuardDuty」とします
   - ランタイムは「Python 3.11」を選択します
   - 適切なIAMロールを設定します
-- Labmdaコードはこちらからダウンロードして、zipファイルをアップロードしてください
+- Lambdaコードはこちらからダウンロードして、zipファイルをアップロードしてください
   - https://github.com/gassara-kys/dify-example/blob/master/function/dist/AnalyzeGuardDuty.zip
 - DifyのAPIの接続先情報を環境変数に設定します
   - `HOST`: DifyサーバのIPアドレス
   - `API_KEY`: 先ほど生成したDifyのAPIキー
-- その他Labmdaの設定
+- その他Lambdaの設定
   - タイムアウトは5分程度に設定してください（LLMの処理に数十秒かかる可能性があるため）
   - VPC設定で、Difyサーバが配置されているサブネットにアクセスできるようにしてください
     - もし、Difyサーバがインターネットからアクセスできる場合はこの設定は不要です
@@ -341,7 +333,7 @@ EventBridgeのルール作成では、以下のように設定します。
 - 新規ルールの作成
 - イベントソースで「AWSのサービス」を選択
 - サービスで「GuardDuty」を選択
-− イベントタイプで「GuardDuty Finding」を選択
+- イベントタイプで「GuardDuty Finding」を選択
 - イベントパターンで以下を指定
 
 ```json
@@ -365,7 +357,7 @@ EventBridgeのルール作成では、以下のように設定します。
 
 最終的にAWS Lambdaの画面で上記のようになっていれば設定完了です。
 
-### Amazon GuardDutyでサンプルのFidingを生成し一連のフローをテストする
+### Amazon GuardDutyでサンプルのFindingを生成し一連のフローをテストする
 
 それでは最後に全体を通してテストします。
 今回はテストなのでGuardDutyのサンプルのFindingを生成します。
@@ -383,7 +375,6 @@ EventBridgeのルール作成では、以下のように設定します。
 
 ![Dify ワークフローログ](../image/dify-workflow-log.png)
 
-
 ## 終わりに
 
 いかがでしたでしょうか。今回はGuardDutyのデータを処理しましたが、LLMを利用することでどんなセキュリティのイベントも解析が可能になります。（AWS CloudTrailやアクセスログなど）
@@ -391,8 +382,6 @@ EventBridgeのルール作成では、以下のように設定します。
 
 まずはみなさんのセキュリティ業務で特に頻度が高く負担になっているところからワークフロー作成を検討してはいかがでしょうか。
 
-Difyのようなツールを使った環境が構築できれば、エンジニアではなくてもワークフローを組むことができるようになります。さらに組み込みのツールが豊富で、今回利用したSlack連携意外にも、WEBサーチや、チケット管理システムへの登録や、既存のAPIへの連携などの可能です。
+Difyのようなツールを使った環境が構築できれば、エンジニアではなくてもワークフローを組むことができるようになります。さらに組み込みのツールが豊富で、今回利用したSlack連携以外にも、WEBサーチや、チケット管理システムへの登録や、既存のAPIへの連携などが可能です。
 
 セキュリティオペレーションの自動化のハードルがますます下がってきましたね。今後もLLMや周辺のツールのアップデートに期待です。
-
-
