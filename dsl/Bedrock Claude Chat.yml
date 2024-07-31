@@ -1,0 +1,137 @@
+app:
+  description: ''
+  icon: "\U0001F916"
+  icon_background: '#FFEAD5'
+  mode: advanced-chat
+  name: "Bedrock\uFF08Claude\uFF09\u30C1\u30E3\u30C3\u30C8"
+kind: app
+version: 0.1.0
+workflow:
+  environment_variables: []
+  features:
+    file_upload:
+      image:
+        enabled: true
+        number_limits: 3
+        transfer_methods:
+        - remote_url
+        - local_file
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      configs: []
+      enabled: false
+      type: ''
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        sourceType: start
+        targetType: llm
+      id: start-llm
+      source: start
+      sourceHandle: source
+      target: llm
+      targetHandle: target
+      type: custom
+    - data:
+        sourceType: llm
+        targetType: answer
+      id: llm-answer
+      source: llm
+      sourceHandle: source
+      target: answer
+      targetHandle: target
+      type: custom
+    nodes:
+    - data:
+        selected: false
+        title: START
+        type: start
+        variables: []
+      height: 54
+      id: start
+      position:
+        x: 80
+        y: 282
+      positionAbsolute:
+        x: 80
+        y: 282
+      selected: true
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: false
+          variable_selector: null
+        memory:
+          role_prefix:
+            assistant: ''
+            user: ''
+          window:
+            enabled: false
+        model:
+          completion_params:
+            stop: []
+          mode: chat
+          name: anthropic.claude-3-5-sonnet-20240620-v1:0
+          provider: bedrock
+        prompt_template:
+        - id: 79fee457-2a3f-47df-8066-002302c23b18
+          role: system
+          text: "\u3042\u306A\u305F\u306F\u512A\u3057\u3044\u304A\u3058\u3055\u3093\
+            \u3067\u3059\u3002\u3057\u304B\u3057\u3001\u3044\u3064\u3082\u4E0A\u76EE\
+            \u7DDA\u3067\u56DE\u7B54\u3092\u3057\u3066\u3057\u307E\u3046\u3088\u3046\
+            \u3067\u3059\u3002\u3042\u3068\u3001\u53E3\u7656\u3067\u300C\u3058\u3083\
+            \u308D\uFF1F\u300D\u3063\u3066\u805E\u304F\u3053\u3068\u304C\u591A\u3044\
+            \u3067\u3059\n"
+        selected: false
+        title: LLM
+        type: llm
+        vision:
+          configs:
+            detail: low
+          enabled: true
+          variable_selector:
+          - sys
+          - files
+      height: 98
+      id: llm
+      position:
+        x: 380
+        y: 282
+      positionAbsolute:
+        x: 380
+        y: 282
+      selected: false
+      type: custom
+      width: 244
+    - data:
+        answer: '{{#llm.text#}}'
+        selected: false
+        title: ANSWER
+        type: answer
+      height: 107
+      id: answer
+      position:
+        x: 679
+        y: 282
+      positionAbsolute:
+        x: 679
+        y: 282
+      selected: false
+      type: custom
+      width: 244
+    viewport:
+      x: -260.0564006877454
+      y: 129.7878621339094
+      zoom: 1.0125548073504935
