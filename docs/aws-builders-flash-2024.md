@@ -1,16 +1,20 @@
-# [実践] AWS上でDifyを使ったセキュリティオペレーション自動化
+# (WIP) [実践] AWS上でDifyを使ったセキュリティオペレーション自動化
 
 
 TODO: 以下は雑なメモで要修正
 
+## 自己紹介
 
-## EC2インスタンス作成
+
+## Difyサーバの構築
+
+### EC2インスタンス作成
 - AMI: Amazon Linux 2023
 - Instance type: t3.medium (2vCPU, 4GB MEMが必要)
 - セキュリティグループ: インバウンドルールにHTTP(80)を追加
 - その他は任意で
 
-## docker install
+### docker install
 ```bash
 $ sudo dnf install docker git
 $ sudo usermod -a -G docker ssm-user # またはec2-user
@@ -22,19 +26,19 @@ Docker version 25.0.3, build 4debf41
 # ここで一度ログアウトして、再度ログインする。（グループが反映されてdockerコマンドが使えるようになる）
 ```
 
-## docker-compose install
+### docker-compose install
 https://matsuand.github.io/docs.docker.jp.onthefly/compose/install/
 
 ```bash
 $ DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
 $ mkdir -p $DOCKER_CONFIG/cli-plugins
-$ curl -SL https://github.com/docker/compose/releases/download/v2.4.1/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+$ curl -SL https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
 $ chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
 $ docker compose version
-Docker version 25.0.3, build 4debf41
+Docker Compose version v2.29.1
 ```
 
-## Difyインストール
+### Difyインストール
 https://github.com/langgenius/dify.git
 ```bash
 $ git clone https://github.com/langgenius/dify.git
@@ -43,7 +47,7 @@ $ cp .env.example .env
 $ docker compose up -d
 ```
 
-## 接続
+### 接続
 - ここまでで、Difyサーバの立ち上げは完了
 - httpsでのアクセスはデフォルトでは対応していない
   - お使いの環境にあわせていくつかの選択肢がある
@@ -54,7 +58,7 @@ $ docker compose up -d
   - Difyサーバを直接インターネットフェーシングさせずに済むためよりセキュア
 
 
-## ALBの設定
+### ALBの設定
 
 - ターゲットグループの作成
   - ターゲットの種類は「インスタンス」を指定し、先ほど作成したEC2インスタンスを登録
@@ -72,8 +76,12 @@ $ docker compose up -d
   - https://{ALBのDNS名またはIPアドレス}/install
   - 管理者ユーザを作成してログイン
 
-## モデルの設定
-- 以下のポリシーでIAMロールを作成する
+
+## Difyの設定
+
+### Bedrockの設定
+- 事前にBedrockでClaudeモデルとTitanモデルを利用できるよう有効化しておきます
+- 以下のポリシーでIAMロールを作成し、Difyサーバー（EC2）に割り当てます
 ```json
 {
     "Version": "2012-10-17",
@@ -88,4 +96,18 @@ $ docker compose up -d
     ]
 }
 ```
-- EC2にIAMロールを割り当てる
+- Dify側でBedrockを有効化します（有効にしたRegionを指定）
+
+### ナレッジの登録
+
+GuardDutyのドキュメント(EC2とIAMだけ)
+- https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/guardduty_finding-types-ec2.html
+- https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/guardduty_finding-types-iam.html
+
+
+### ワークフローを作成
+
+
+
+
+
