@@ -210,7 +210,11 @@ Difyのコンソール画面にログインして右上のメニューから「�
 Amazon GuardDutyのFindingをLLMで解説させるために、公式のドキュメントをナレッジとして登録します。
 ナレッジを利用するとRAGという手法でLLMにコンテキストを与えることができます。これにより、より具体的で正確な回答を得ることができます。
 
-以下の２つのURLにアクセスし、`印刷 ＞ PDFに保存` でPDFファイルをダウンロードします。
+以下のURLからPDFドキュメントをダウンロードしてください。
+- https://github.com/gassara-kys/dify-example/tree/master/knowledge/guardduty
+
+
+もし、最新のドキュメントを取得するには以下の２つのURLにアクセスし、`印刷 ＞ PDFに保存` でPDFファイルをダウンロードします。
 
 - https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/guardduty_finding-types-ec2.html
 - https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/guardduty_finding-types-iam.html
