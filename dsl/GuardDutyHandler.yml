@@ -1,0 +1,348 @@
+app:
+  description: "GuardDuty\u306EFinding\u3092\u89E3\u8AAC\u3057\u3066\u3044\u3044\u611F\
+    \u3058\u306B\u30A2\u30A6\u30C8\u30D7\u30C3\u30C8\u3057\u307E\u3059"
+  icon: "\U0001F916"
+  icon_background: '#FFEAD5'
+  mode: workflow
+  name: GuardDutyHandler
+kind: app
+version: 0.1.0
+workflow:
+  environment_variables: []
+  features:
+    file_upload:
+      image:
+        enabled: false
+        number_limits: 3
+        transfer_methods:
+        - local_file
+        - remote_url
+    opening_statement: ''
+    retriever_resource:
+      enabled: true
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        isInIteration: false
+        sourceType: start
+        targetType: question-classifier
+      id: 1722391426202-source-1722397570856-target
+      source: '1722391426202'
+      sourceHandle: source
+      target: '1722397570856'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: question-classifier
+        targetType: knowledge-retrieval
+      id: 1722397570856-1-1722397470145-target
+      source: '1722397570856'
+      sourceHandle: '1'
+      target: '1722397470145'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: knowledge-retrieval
+        targetType: llm
+      id: 1722397470145-source-1722398149172-target
+      source: '1722397470145'
+      sourceHandle: source
+      target: '1722398149172'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: llm
+        targetType: tool
+      id: 1722398149172-source-1722398839249-target
+      source: '1722398149172'
+      sourceHandle: source
+      target: '1722398839249'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: tool
+        targetType: end
+      id: 1722398839249-source-1722399235845-target
+      source: '1722398839249'
+      sourceHandle: source
+      target: '1722399235845'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    - data:
+        isInIteration: false
+        sourceType: question-classifier
+        targetType: end
+      id: 1722397570856-1722398080959-1722399356175-target
+      source: '1722397570856'
+      sourceHandle: '1722398080959'
+      target: '1722399356175'
+      targetHandle: target
+      type: custom
+      zIndex: 0
+    nodes:
+    - data:
+        desc: "GuardDuty\u306EFinding\u3092\u53D7\u3051\u53D6\u308B"
+        selected: false
+        title: "\u958B\u59CB"
+        type: start
+        variables:
+        - label: finding
+          max_length: null
+          options: []
+          required: true
+          type: paragraph
+          variable: finding
+        - label: type
+          max_length: 256
+          options: []
+          required: true
+          type: text-input
+          variable: type
+        - label: serverity
+          max_length: 256
+          options: []
+          required: true
+          type: number
+          variable: severity
+      height: 170
+      id: '1722391426202'
+      position:
+        x: 80
+        y: 282
+      positionAbsolute:
+        x: 80
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        dataset_ids:
+        - a6d5e1e3-28c6-417c-aad8-6f2e3bfc7fd1
+        desc: "\u30C9\u30AD\u30E5\u30E1\u30F3\u30C8\u3092\u691C\u7D22"
+        query_variable_selector:
+        - '1722391426202'
+        - finding
+        retrieval_mode: single
+        selected: false
+        single_retrieval_config:
+          model:
+            completion_params: {}
+            mode: chat
+            name: anthropic.claude-3-5-sonnet-20240620-v1:0
+            provider: bedrock
+        title: "\u77E5\u8B58\u53D6\u5F97"
+        type: knowledge-retrieval
+      height: 120
+      id: '1722397470145'
+      position:
+        x: 726.6465717760186
+        y: 175.3865233253025
+      positionAbsolute:
+        x: 726.6465717760186
+        y: 175.3865233253025
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        classes:
+        - id: '1'
+          name: "IAM\u307E\u305F\u306FEC2\u95A2\u9023\u306EFinding"
+        - id: '1722398080959'
+          name: "\u305D\u306E\u4ED6"
+        desc: "Finding\u306E\u5206\u985E"
+        instruction: "\u4EE5\u4E0B\u306EGuardDuty\u306EFinding\u3092\u53D7\u4FE1\u3057\
+          \u307E\u3057\u305F\u3002\ntype\u30D1\u30E9\u30E1\u30FC\u30BF\u304B\u3089"
+        instructions: ''
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: anthropic.claude-3-5-sonnet-20240620-v1:0
+          provider: bedrock
+        query_variable_selector:
+        - '1722391426202'
+        - type
+        selected: false
+        title: "\u8CEA\u554F\u5206\u985E\u5668"
+        topics: []
+        type: question-classifier
+      height: 212
+      id: '1722397570856'
+      position:
+        x: 396
+        y: 282
+      positionAbsolute:
+        x: 396
+        y: 282
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        context:
+          enabled: true
+          variable_selector:
+          - '1722397470145'
+          - result
+        desc: "LLM\u3067\u8981\u7D04\u3092\u751F\u6210"
+        model:
+          completion_params:
+            temperature: 0.7
+          mode: chat
+          name: anthropic.claude-3-5-sonnet-20240620-v1:0
+          provider: bedrock
+        prompt_template:
+        - id: 4c201608-abba-4a6d-9986-27a125e416a6
+          role: system
+          text: "\u3042\u306A\u305F\u306F\u30AF\u30E9\u30A6\u30C9\u30BB\u30AD\u30E5\
+            \u30EA\u30C6\u30A3\u306E\u30A4\u30F3\u30B7\u30C7\u30F3\u30C8\u30CF\u30F3\
+            \u30C9\u30EA\u30F3\u30B0\u306E\u30D7\u30ED\u30D5\u30A7\u30C3\u30B7\u30E7\
+            \u30CA\u30EB\u3067\u3059\u3002\u30BB\u30AD\u30E5\u30EA\u30C6\u30A3\u306B\
+            \u8A73\u3057\u304F\u306A\u3044\u4EBA\u306B\u3082\u5206\u304B\u308A\u3084\
+            \u3059\u3044\u8AAC\u660E\u304C\u3067\u304D\u307E\u3059\n"
+        - id: 634daf7d-518c-4081-8d06-8fea26237bc2
+          role: user
+          text: "\u4EE5\u4E0B\u306EGuardDuty\u306EFinding\u3092\u691C\u77E5\u3057\u307E\
+            \u3057\u305F\u3002\n\n### type\n{{#1722391426202.type#}}\n\n### \u91CD\
+            \u5927\u5EA6\n{{#1722391426202.severity#}}\n(Severity\u5B9A\u7FA9)\n-\
+            \ [High] (\u9AD8) 7.0\uFF5E8.9: \u30EA\u30BD\u30FC\u30B9\u304C\u4FB5\u5BB3\
+            \u3055\u308C\u3001\u4E0D\u6B63\u306A\u76EE\u7684\u3067\u6D3B\u767A\u306B\
+            \u4F7F\u7528\u3055\u308C\u3066\u3044\u308B\u3053\u3068\u3092\u793A\u3057\
+            \u307E\u3059\n- [Medium] (\u4E2D) 4.0\uFF5E6.9: \u901A\u5E38\u89B3\u5BDF\
+            \u3055\u308C\u308B\u52D5\u4F5C\u304B\u3089\u9038\u8131\u3059\u308B\u4E0D\
+            \u5BE9\u306A\u30A2\u30AF\u30C6\u30A3\u30D3\u30C6\u30A3\u3092\u793A\u3057\
+            \u3001\u5834\u5408\u306B\u3088\u3063\u3066\u306F\u30EA\u30BD\u30FC\u30B9\
+            \u304C\u4FB5\u5BB3\u3055\u308C\u3066\u3044\u308B\u3053\u3068\u3092\u793A\
+            \u3057\u307E\u3059\n- [Low] (\u4F4E) 1.0\uFF5E3.9: \u4FB5\u5BB3\u3055\u308C\
+            \u306A\u304B\u3063\u305F\u4E0D\u5BE9\u306A\u30A2\u30AF\u30C6\u30A3\u30D3\
+            \u30C6\u30A3\u304C\u8A66\u884C\u3055\u308C\u305F\u3053\u3068\u3092\u793A\
+            \u3057\u307E\u3059\n\n### finding\u306E\u8A73\u7D30\n{{#1722391426202.finding#}}\n\
+            \n\u30C9\u30AD\u30E5\u30E1\u30F3\u30C8\u3092\u53C2\u8003\u306B\u3001\u691C\
+            \u77E5\u3057\u305FFinding\u306E\u300C\u89E3\u8AAC\u300D\u3001\u300C\u512A\
+            \u5148\u5EA6\u300D\u3001\u300C\u6B21\u306B\u5B9F\u65BD\u3059\u3079\u304D\
+            \u30A2\u30AF\u30B7\u30E7\u30F3\u300D\u3092\u751F\u6210\u3057\u3066\u304F\
+            \u3060\u3055\u3044\u3002\n\n### \u30C9\u30AD\u30E5\u30E1\u30F3\u30C8\n\
+            {{#context#}}\n\n\u307E\u305F\u3001\u751F\u6210\u3055\u308C\u305F\u30C6\
+            \u30AD\u30B9\u30C8\u306FSlack\u306B\u9001\u4FE1\u3055\u308C\u308B\u305F\
+            \u3081\u5FC5\u305A\u4EE5\u4E0B\u306E\u30D5\u30A9\u30FC\u30DE\u30C3\u30C8\
+            \u3067\u304A\u9858\u3044\u3057\u307E\u3059\n\n### \u30D5\u30A9\u30FC\u30DE\
+            \u30C3\u30C8\n*GuardDuty\u306E\u30BF\u30A4\u30D7*\n{{#1722391426202.type#}}\n\
+            \n*\u512A\u5148\u5EA6*\n\n*\u89E3\u8AAC*\n\n*\u6B21\u306E\u30A2\u30AF\u30B7\
+            \u30E7\u30F3\uFF08\u6848\uFF09*\n"
+        selected: false
+        title: LLM
+        type: llm
+        variables: []
+        vision:
+          configs:
+            detail: high
+          enabled: true
+      height: 126
+      id: '1722398149172'
+      position:
+        x: 1040.8002362212278
+        y: 175.3865233253025
+      positionAbsolute:
+        x: 1040.8002362212278
+        y: 175.3865233253025
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: "Slack\u9001\u4FE1"
+        provider_id: slack
+        provider_name: slack
+        provider_type: builtin
+        selected: true
+        title: Incoming Webhook to send message
+        tool_configurations:
+          webhook_url: "\u4FEE\u6B63\u3057\u3066\u304F\u3060\u3055\u3044"
+        tool_label: Incoming Webhook to send message
+        tool_name: slack_webhook
+        tool_parameters:
+          content:
+            type: mixed
+            value: '{{#1722398149172.text#}}'
+        type: tool
+      height: 118
+      id: '1722398839249'
+      position:
+        x: 1326.5236402198514
+        y: 175.3865233253025
+      positionAbsolute:
+        x: 1326.5236402198514
+        y: 175.3865233253025
+      selected: true
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs: []
+        selected: false
+        title: "\u7D42\u4E86"
+        type: end
+      height: 54
+      id: '1722399235845'
+      position:
+        x: 1613.2624106629955
+        y: 175.3865233253025
+      positionAbsolute:
+        x: 1613.2624106629955
+        y: 175.3865233253025
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    - data:
+        desc: ''
+        outputs: []
+        selected: false
+        title: "\u7D42\u4E86 2"
+        type: end
+      height: 54
+      id: '1722399356175'
+      position:
+        x: 733.5496366196287
+        y: 503.77334241319903
+      positionAbsolute:
+        x: 733.5496366196287
+        y: 503.77334241319903
+      selected: false
+      sourcePosition: right
+      targetPosition: left
+      type: custom
+      width: 244
+    viewport:
+      x: -450.71744546367086
+      y: 132.92434066853036
+      zoom: 0.9780631424210574
