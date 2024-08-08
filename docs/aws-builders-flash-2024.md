@@ -1,4 +1,4 @@
-# (WIP) [超簡単] Dify x Amazon Bedrockを使ったセキュリティオペレーション自動化
+# (WIP) [超簡単] Dify x Amazon Bedrockを使ったセキュリティオペレーション自動化 ~ GuardDuty検知結果の自動解析を例に ~
 
 ## セキュリティオペレーションの自動化実現にはLLMの相性が良い
 
@@ -19,8 +19,9 @@ AWSではAmazon GuardDutyなどの既存のセキュリティサービスと Ama
 
 ### 完成図
 
-構築する仕組みは以下のような構成になります。
+構築する仕組みは以下のような構成になります。仕組み全体の流れと、アーキテクチャーを下記の図に示します。
 
+![Overview](../image/overview.png)
 ![AWS Architecture](../image/aws-architecture.png)
 
 - Difyサーバの構築
@@ -47,6 +48,8 @@ Difyに求められるCPU、MEMの要件に注意しつつ、以下のような�
 - `AMI`: Amazon Linux 2023
 - `Instance type`: t3.medium (2vCPU, 4GB MEMが必要)
 - `セキュリティグループ`: インバウンドルールにHTTP(80)を追加
+  - 必要に応じてソースipの制限等を設定
+  - 後にALBを利用するため、その際にはALBのセキュリティグループからのみ通信を制限するように設定
 - その他は任意です
 
 ### docker install
@@ -116,12 +119,12 @@ worker     # ワーカー
 
 ![ALB](../image/aws-access-control.png)
 
-今回はALBを使う手順を記載します。ALB側でIPアドレス制限やOIDC認証（Cognitoなど）を挟むことができます。また、Difyサーバを直接インターネットフェーシングにせずに済むためサーバの脆弱性リスクを軽減できます。
+今回はALBを使う手順を記載します。ALB側でIPアドレス制限やOIDC認証（Cognitoなど）を挟むことができます。また、Difyサーバをプライベートサブネットに配置すれば直接インターネットフェーシングにせずに済むため、サーバの脆弱性リスクを軽減できます。
 
 #### ALBの作成
 
 まずはターゲットグループを作成します。
-- ターゲットの種類は「インスタンス」を指定し、先ほど作成したEC2インスタンスを登録
+- ターゲットの種類は「インスタンス」を指定し、次ページで先ほど作成したEC2インスタンスをチェックしてターゲットに登録
 - ヘルスチェック設定は以下を指定
   - `パス`: /signin
   - `ステータス`: 200
@@ -130,12 +133,15 @@ worker     # ワーカー
 ![ターゲットグループ2](../image/aws-target-group2.png)
 
 ALBの作成
-- 転送先のターゲットグループは先程作成したものを指定
+- リスナーはhttps(443)を、転送先のターゲットグループは先程作成したものを指定
+  - 証明書等の設定など詳細は[公式ドキュメント](https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/application/create-https-listener.html)を参照
 - 適切なセキュリティグループを指定
   - https(443)を許可するセキュリティグループを指定
   - IP制限をかける場合はここで設定（オプション）
 - リスナールールを追加
   - ここで認証の設定も可能（オプション）
+- その他は基本的にデフォルトのまま
+  - VPCとサブネットは今回使用しているものを指定
 
 ![ALB設定](../image/aws-alb-setting.png)
 
@@ -143,19 +149,20 @@ Difyの管理コンソールにアクセス
 - 以下のURLにアクセスして管理者ユーザを作成してください
   - https://{ALBのDNS名またはIPアドレス}/install
 
-カスタムのドメインを使用する場合は、別途ACMなどの設定が必要です。
+カスタムのドメインを使用する場合は、別途ACM,Route53(DNS)などの設定が必要です。
 管理者ユーザの作成が完了したらログインしてください。
 
 ![Difyログイン](../image/dify-login.png)
 
-## Difyの設定
+## Difyの設定とワークフロー構築
 
 Difyサーバが構築できたらAmazon Bedrockを利用できるように準備します。
 
 ### モデルの有効化
 
 リージョンは任意ですが、今回は `バージニア(us-east-1)` で有効化の設定を行います。
-LLM界隈はアップデートが激しく最新のLLMモデルを利用するにはバージニアで有効化しておくとすぐに利用できる可能性が高まります。
+LLM界隈はアップデートが激しく最新のLLMモデルを利用するにはバージニアまたはオレゴンで有効化しておくとすぐに利用できる可能性が高まります。
+※ 2024年8月7日にAnthropic Claude 3.5 Sonnetが東京リージョンで利用可能になりました。今回用いるモデルはいずれも東京で利用可能です。
 
 ![モデル有効化](../image/aws-bedrock-model-setting.png)
 
@@ -214,14 +221,14 @@ Amazon GuardDutyのFindingをLLMで解説させるために、公式のドキュ
 - https://github.com/gassara-kys/dify-example/tree/master/knowledge/guardduty
 
 
-もし、最新のドキュメントを取得するには以下の２つのURLにアクセスし、`印刷 ＞ PDFに保存` でPDFファイルをダウンロードします。
+もし、最新のドキュメントを取得したい場合は、以下の２つのURLにアクセスし、`印刷 ＞ PDFに保存` でPDFファイルをダウンロードします。
 
 - https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/guardduty_finding-types-ec2.html
 - https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/guardduty_finding-types-iam.html
 
 ![PDFダウンロード](../image/aws-doc-print.png)
 
-Difyのナレッジメニューで「知識を作成」を選択します
+Difyのナレッジメニューで「知識を作成」を選択して、ダウンロードしたGuardDutyのFindingに関するドキュメント(2つのPDFファイル)をアップロードし、次に進みます。
 
 ![Difyナレッジ追加](../image/dify-knowledge-create.png)
 
@@ -243,7 +250,7 @@ Difyのナレッジメニューで「知識を作成」を選択します
 
 #### DSLファイルのインポート
 
-ワークフローを一から作るのではなく事前に用意させてもらったDSLファイルをインポートし、自身の環境に合わせて少し修正します。
+ワークフローを一から作るのではなく、事前に用意させてもらったDSLファイルをインポートし、自身の環境に合わせて少し修正します。
 
 以下のURLからDSLファイルをダウンロードしてください
 
@@ -268,7 +275,7 @@ Difyのナレッジメニューで「知識を作成」を選択します
 
 ワークフローのテストは右上の「実行」から行うことができます。
 
-以下の必須パラメータを設定して実行します。
+以下の必須パラメータを設定して実行します。  
 
 - finding: テスト用のJSONファイルを指定
 - type: GuardDutyのFindingタイプを指定
@@ -331,7 +338,7 @@ EventBridgeからイベントデータを受け取り、パースしてDifyのAP
   - 関数名は「AnalyzeGuardDuty」とします
   - ランタイムは「Python 3.11」を選択します
   - 適切なIAMロールを設定します
-- Lambdaコードはこちらからダウンロードして、zipファイルをアップロードしてください
+- Lambdaコードはこちらのページからダウンロードして、zipファイルをアップロードしてください
   - https://github.com/gassara-kys/dify-example/blob/master/function/dist/AnalyzeGuardDuty.zip
 - DifyのAPIの接続先情報を環境変数に設定します
   - `HOST`: DifyサーバのIPアドレス
